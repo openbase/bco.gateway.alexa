@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "bco-alexa-gateway"
+version = "0.1.0"
+description = "An Amazon Alexa skill that acts as a gateway to control a BCO environment."
+authors = ["Christian Leichsenring <christian.leichsenring@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+requests = "^2.26.0"
+pyttsx3 = "^2.90"
+pyjwt = "^2.2.0"
+ask-sdk-core = "^1.18.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+tox = "^3.24.3"
+black = "^21.9b0"
+
+[tool.black]
+line-length = 120
+include = '\.pyi?$'
+
+[tool.pytest]
+addopts = "-vv"
+testpaths = "tests"
+
+[tool.tox]
+envlist = ["py38", "py39", "py310", "py311"]
+
+[testenv]
+deps = ["pytest", "requests"]
+commands =["pytest"]
+
+[tool.gettext_i18n]
+input_dir = "locales"
+output_dir = "locale"
+domain = "messages"
+languages = ["en_US"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
