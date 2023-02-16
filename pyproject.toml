@@ -10,6 +10,7 @@ requests = "^2.26.0"
 pyttsx3 = "^2.90"
 pyjwt = "^2.2.0"
 ask-sdk-core = "^1.18.0"
+more-itertools = "^9.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"

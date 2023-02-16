@@ -6,6 +6,7 @@ from ask_sdk_core.dispatch_components import AbstractRequestHandler, AbstractRes
 from ask_sdk_core.utils import is_intent_name
 from ask_sdk_core.handler_input import HandlerInput
 from typing import Dict, Any
+from more_itertools import first
 
 # Define constants
 BCO_GRAPHQL_ENDPOINT = 'http://ha:13781/graphql'
@@ -16,7 +17,6 @@ sb = SkillBuilder()
 # Initialize gettext
 gettext.install('messages', localedir='locales', names=['ngettext'])
 
-# Define helper function to get slot values
 def get_slot_value(handler_input: HandlerInput, slot_name: str) -> str:
     """
     Helper function to get the value of a slot.
@@ -27,7 +27,6 @@ def get_slot_value(handler_input: HandlerInput, slot_name: str) -> str:
     """
     return handler_input.request_envelope.request.intent.slots[slot_name].value
 
-# Define helper function to get the current language
 def get_language(handler_input: HandlerInput) -> str:
     """
     Helper function to get the current language of the user.
@@ -37,7 +36,6 @@ def get_language(handler_input: HandlerInput) -> str:
     """
     return handler_input.request_envelope.request.locale
 
-# Define helper function to get a device by label
 def get_device_by_label(label: str) -> Dict[str, Any]:
     """
     Helper function to get a device by its label.
@@ -59,11 +57,10 @@ def get_device_by_label(label: str) -> Dict[str, Any]:
     response = requests.post(BCO_GRAPHQL_ENDPOINT, json={'query': query})
     devices = response.json()['data']['devices']
     for device in devices:
-        if device['label'][0]['value'] == label:
+        if first(device['label'])['value'] == label:
             return device
     return None
 
-# Define helper function to get a scene by label
 def get_scene_by_label(label: str) -> Dict[str, Any]:
     """
     Helper function to get a scene by its label.
@@ -85,11 +82,10 @@ def get_scene_by_label(label: str) -> Dict[str, Any]:
     response = requests.post(BCO_GRAPHQL_ENDPOINT, json={'query': query})
     scenes = response.json()['data']['scenes']
     for scene in scenes:
-        if scene['label'][0]['value'] == label:
+        if first(scene['label'])['value'] == label:
             return scene
     return None
 
-# Define helper function to get a room by label
 def get_room_by_label(label: str) -> Dict[str, Any]:
     """
     Helper function to get a room by its label.
@@ -111,7 +107,7 @@ def get_room_by_label(label: str) -> Dict[str, Any]:
     response = requests.post(BCO_GRAPHQL_ENDPOINT, json={'query': query})
     rooms = response.json()['data']['rooms']
     for room in rooms:
-        if room['label'][0]['value'] == label:
+        if first(room['label'])['value'] == label:
             return room
     return None
 
@@ -134,11 +130,11 @@ class TurnDeviceOffHandler(AbstractRequestHandler):
             response = requests.post(BCO_GRAPHQL_ENDPOINT, json={'query': query})
             success = response.json()['data']['turnDeviceOff']['success']
             if success:
-                speech_text = _(f"The {device_name} is now off.")
+                speech_text = _("The {device_name} is now off.").format(device_name=device_name)
             else:
-                speech_text = _(f"I am sorry, but I was unable to turn the {device_name} off. Please try again later.")
+                speech_text = _("I am sorry, but I was unable to turn the {device_name} off. Please try again later.").format(device_name=device_name)
         else:
-            speech_text = _(f"I am sorry, but I do not recognize that device name. Please try again with a different device name.")
+            speech_text = _("I am sorry, but I do not recognize that device name. Please try again with a different device name.")
         return handler_input.response_builder.speak(speech_text).response
 
 # Define request handler for activating scenes
@@ -160,13 +156,13 @@ class ActivateSceneHandler(AbstractRequestHandler):
             response = requests.post(BCO_GRAPHQL_ENDPOINT, json={'query': query})
             success = response.json()['data']['activateScene']['success']
             if success:
-                speech_text = _(f"The {scene_name} scene has been activated.")
+                speech_text = _("The {scene_name} scene has been activated.").format(scene_name=scene_name)
             else:
                 speech_text = _(
-                    f"I am sorry, but I was unable to activate the {scene_name} scene. Please try again later.")
+                    "I am sorry, but I was unable to activate the {scene_name} scene. Please try again later.").format(scene_name=scene_name)
         else:
             speech_text = _(
-                f"I am sorry, but I do not recognize that scene name. Please try again with a different scene name.")
+                "I am sorry, but I do not recognize that scene name. Please try again with a different scene name.")
         return handler_input.response_builder.speak(speech_text).response
 
 # Define request handler for setting the room
@@ -188,12 +184,13 @@ class SetRoomHandler(AbstractRequestHandler):
             response = requests.post(BCO_GRAPHQL_ENDPOINT, json={'query': query})
             success = response.json()['data']['setRoom']['success']
             if success:
-                speech_text = _(f"The {room_name} room has been set.")
+                speech_text = _("The {room_name} room has been set.").format(room_name=room_name)
             else:
-                speech_text = _(f"I am sorry, but I was unable to set the {room_name} room. Please try again later.")
+                speech_text = _("I am sorry, but I was unable to set the {room_name} room. Please try again later.")\
+                    .format(room_name=room_name)
         else:
             speech_text = _(
-                f"I am sorry, but I do not recognize that room name. Please try again with a different room name.")
+                "I am sorry, but I do not recognize that room name. Please try again with a different room name.")
         return handler_input.response_builder.speak(speech_text).response
 
 # Define response interceptor for setting language
